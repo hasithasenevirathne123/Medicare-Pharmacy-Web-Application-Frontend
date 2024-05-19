@@ -12,6 +12,16 @@ const savePrescriptionFile = async(data) =>{
     return response;
 }
 
+const getPrescriptionInfo = async(customerId) => {
+    const response = await getData(`/prescription/get-user-prescription/${customerId}`);
+    return response;
+}
+
+const getOrderData = async(data) => {
+const response = await getData(`/order/place-order`,data);
+return response;
+}
+
 
 // const getProductImage = async(ImageName) => {
 
@@ -19,4 +29,8 @@ const savePrescriptionFile = async(data) =>{
 //     return response;
 // }
 
-export {getAllProductsForCustomerDashboard,savePrescriptionFile}
+export {getAllProductsForCustomerDashboard,
+    savePrescriptionFile,
+    getPrescriptionInfo,
+    getOrderData
+}

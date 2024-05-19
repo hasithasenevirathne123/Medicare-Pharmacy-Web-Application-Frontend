@@ -74,7 +74,8 @@ function Header() {
           userDetails.userId = response?.data?.customer?.id;
         }
       }
-
+      
+      
       if(response?.responseCode === 1000){
         showAlertMessage({
           message:"Login successful",

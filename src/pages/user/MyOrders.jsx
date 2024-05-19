@@ -1,9 +1,17 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import inhailer from '../../assets/images/inhailer.png';
 
 const MyOrders = () => {
+
+    const[myorder, SetmyOders] = useState([]);
+
+    const getOrderDetails = async () => {
+
+    }
+
+    
 
 
     const orders = [

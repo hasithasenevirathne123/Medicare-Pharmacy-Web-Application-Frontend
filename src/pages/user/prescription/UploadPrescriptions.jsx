@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ContainerForm from "../../../components/ContainerForm/ContainerForm";
 import {
   Button,
@@ -56,6 +56,20 @@ const UploadPrescriptions = () => {
     width: 1,
   });
 
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("No file selected");
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
+    } else {
+      setFile(null);
+      setFileName("No file selected");
+    }
+  };
+
   const navigate = useNavigate();
 
   const savePrescription = async (data) => {
@@ -66,7 +80,7 @@ const UploadPrescriptions = () => {
       fulfilment: data.fulfilment.value,
       substitutes: data.substitutes.value,
       prescriptionItem: data.prescriptionItem,
-      file: data.file,
+      file: data.file.value,
       paymentMethod: data.paymentMethod.value,
       refund: data.refund.value,
       shippingAddress:data.shippingAddress
@@ -353,7 +367,26 @@ const UploadPrescriptions = () => {
                 Upload Prescription file{" "}
                 <span style={{ color: "#0070C0" }}>*</span>
               </Typography>
-              <Button
+                <Button
+        fullWidth
+        component="label"
+        variant="outlined"
+        startIcon={<CloudUploadIcon />}
+      >
+        Upload
+        <input
+          type="file"
+          name="file"
+          {...register("file")}
+          accept=".pdf,.doc,.docx"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+      </Button>
+      <div style={{ marginTop: '10px' }}>
+        <h4 {...register("file")}>{fileName}</h4>
+      </div>
+              {/* <Button
                 fullWidth
                 component="label"
                 role={undefined}
@@ -366,8 +399,7 @@ const UploadPrescriptions = () => {
               </Button>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <img src={File} alt="" />
-                <h4>file</h4>
-              </div>
+              </div> */}
             </Grid>
 
             {/*  Fulfilment field */}
