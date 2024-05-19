@@ -1,5 +1,5 @@
 import { Grid, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import TotalCountCard from '../../components/ContentCard/TotalCountCard'
 import ContainerForm from '../../components/ContainerForm/ContainerForm'
 import L from 'leaflet';
@@ -9,10 +9,29 @@ import man from '../../assets/images/avatar2.png'
 import Category from '../../assets/images/category.png'
 import Orders from '../../assets/images/orders1.png'
 import Pending from '../../assets/images/pending.png'
+import { getDashboardData } from '../../services/adminService';
+import { useSelector } from 'react-redux';
+// import '../../services/adminService'
 
 
 
 const Dashboard = () => {
+
+  const adminId = useSelector((state) => state.user.userDetails.userId);
+  const [dashboarddata, setDashboardData] = useState([]);
+
+  console.log("response: ", getDashboardData(adminId))
+
+  const getAdminDashboardData = async () => {
+    const response = await getDashboardData(adminId);
+    // console.log(adminId);
+    // console.log("CustomerCount: ", response);
+    setDashboardData(response.data);
+  };
+
+  useEffect(() => {
+    getAdminDashboardData();
+  }, [adminId])
 
   useEffect(() => {
     const map = L.map('map').setView([7.8731, 80.7718], 7); // Sri Lanka coordinates and zoom level
@@ -33,11 +52,18 @@ const Dashboard = () => {
   return (
     <div style={{ height: '100%' }}>
       <Grid container p={3} spacing={2}>
-        <TotalCountCard title="Customers" count="150" img={man} w={'50%'}/>
-        <TotalCountCard title="Categories" count="10"  img={Category} w={'50%'}/>
-        <TotalCountCard title="Today Orders" count="20" img={Orders} w={'80%'}/>
-        <TotalCountCard title="Pending Orders" count="5" img={Pending}w={'50%'} />
-
+        {dashboarddata && (
+          <TotalCountCard title="Customers" count={dashboarddata.allCustomers} img={man} w={'50%'} />
+        )}
+        {dashboarddata && (
+          <TotalCountCard title="Categories" count={dashboarddata.allCategories} img={Category} w={'50%'} />
+        )}
+        {dashboarddata && (
+          <TotalCountCard title="Today Orders" count={dashboarddata.todayOrdersCount} img={Orders} w={'80%'} />
+        )}
+        {dashboarddata && (
+          <TotalCountCard title="Pending Orders" count={dashboarddata.pendingOrdersCount} img={Pending} w={'50%'} />
+        )}
 
       </Grid>
 
@@ -50,39 +76,47 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} md={6} p={2} mt={-2}>
           <Grid container spacing={'10'}>
-            <IncomeCard title="Last Month Income" value="150000" data={[
-              { name: 'Jan', value: 100 },
-              { name: 'Feb', value: 240 },
-              { name: 'Mar', value: 150 },
-              { name: 'Apr', value: 250 },
-              { name: 'May', value: 80 },
-              { name: 'Jun', value: 800 },
-            ]} />
-            <IncomeCard title="Today Income" value="50000" data={[
-              { name: 'Jan', value: 100 },
-              { name: 'Feb', value: 240 },
-              { name: 'Mar', value: 150 },
-              { name: 'Apr', value: 250 },
-              { name: 'May', value: 80 },
-              { name: 'Jun', value: 800 },
-            ]} />
-            <IncomeCard title="Recived  Income" value="23000" data={[
-              { name: 'Jan', value: 100 },
-              { name: 'Feb', value: 240 },
-              { name: 'Mar', value: 150 },
-              { name: 'Apr', value: 250 },
-              { name: 'May', value: 80 },
-              { name: 'Jun', value: 800 },
-            ]} />
-            <IncomeCard title="Pending Income" value="5000" data={[
-              { name: 'Jan', value: 100 },
-              { name: 'Feb', value: 540 },
-              { name: 'Mar', value: 150 },
-              { name: 'Apr', value: 250 },
-              { name: 'May', value: 2000 },
-              { name: 'Jun', value: 800 },
-            ]} />
-
+            {dashboarddata && (
+              <IncomeCard title="Last Month Income" value={dashboarddata.lastMonthIncome} data={[
+                { name: 'Jan', value: 100 },
+                { name: 'Feb', value: 240 },
+                { name: 'Mar', value: 150 },
+                { name: 'Apr', value: 250 },
+                { name: 'May', value: 80 },
+                { name: 'Jun', value: 800 },
+              ]} />
+            )}
+            {dashboarddata && (
+              <IncomeCard title="Today Income" value={dashboarddata.todayIncome} data={[
+                { name: 'Jan', value: 100 },
+                { name: 'Feb', value: 240 },
+                { name: 'Mar', value: 150 },
+                { name: 'Apr', value: 250 },
+                { name: 'May', value: 80 },
+                { name: 'Jun', value: 800 },
+              ]} />
+            )}
+            {dashboarddata && (
+              <IncomeCard title="Recived  Income" value={dashboarddata.receivedIncome} data={[
+                { name: 'Jan', value: 100 },
+                { name: 'Feb', value: 240 },
+                { name: 'Mar', value: 150 },
+                { name: 'Apr', value: 250 },
+                { name: 'May', value: 80 },
+                { name: 'Jun', value: 800 },
+              ]} />
+            )}
+            {dashboarddata && (
+              <IncomeCard title="Pending Income" value={dashboarddata.pendingIncome} data={[
+                { name: 'Jan', value: 100 },
+                { name: 'Feb', value: 540 },
+                { name: 'Mar', value: 150 },
+                { name: 'Apr', value: 250 },
+                { name: 'May', value: 2000 },
+                { name: 'Jun', value: 800 },
+              ]} />
+            )}
+            
           </Grid>
         </Grid>
       </Grid>
