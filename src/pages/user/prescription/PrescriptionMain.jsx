@@ -15,6 +15,13 @@ const PrescriptionMain = () => {
     const response = await getPrescriptionInfo(customerId);
     console.log("prescription data",response);
     setPrescriptionData(response?.data?.prescription);
+    if (response && response.responseCode === 1000) {
+      // navigate("/user/prescription");
+      showAlertMessage({
+        message:"Prescription saved",
+        type:"success",
+      });
+    }
 
   };
   useEffect(()=>{

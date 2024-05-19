@@ -14,7 +14,7 @@ import Card from '../../components/ContentCard/Card3';
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import skin from '../../assets/images/skin3.png';
-import { getAllProductsForCustomerDashboard } from '../../services/customerService';
+import { getAllProductsForCustomerDashboard, getCategoryImage } from '../../services/customerService';
 import { useSelector } from 'react-redux';
 
 const InsideHeader = () => {
@@ -61,19 +61,32 @@ const InsideHeader = () => {
 
  const customerId = useSelector((state)=> state.user.userDetails.userId);
  //console.log("all products",customerId)
-  const getProducts = async() => {
-     try {
-      const response = await getAllProductsForCustomerDashboard(customerId);
-      console.log("all products",response);
-      setCategory(response?.data?.categoryDetails);
-      
-     } catch (error) {
-      console.log("error",error);
-     }
-  }
-
+ 
+ const getProducts = async() => {
+    try {
+     const response = await getAllProductsForCustomerDashboard(customerId);
+     console.log("all products",response);
+     setCategory(response?.data?.categoryDetails);
+     
+    } catch (error) {
+     console.log("error",error);
+    }
+ }
+ 
+ const getImage = async() => {
+    try {
+     const response = await getCategoryImage();
+     console.log("Image",response);
+     setCategory(response?.data?.categoryDetails);
+     
+    } catch (error) {
+     console.log("error",error);
+    }
+ }
+ 
   useEffect(()=>{
      getProducts();
+     getImage();
   },[])
   return (
     <>

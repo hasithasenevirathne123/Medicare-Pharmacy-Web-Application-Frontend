@@ -2,25 +2,33 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePag
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import inhailer from '../../assets/images/inhailer.png';
+import { getOrderData } from '../../services/customerService';
+import { useSelector } from 'react-redux';
 
 const MyOrders = () => {
 
-    const[myorder, SetmyOders] = useState([]);
+    const customerId = useSelector((state)=> state.user.userDetails.userId);
+    const[myorder, setMyOrders] = useState([]);
 
     const getOrderDetails = async () => {
-
+    const response = await getOrderData(customerId);
+    setMyOrders(response?.data?.orders);
     }
+
+    useEffect(()=>{
+    getOrderDetails();
+    },[]);
 
     
 
 
-    const orders = [
-        { id: 1,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
-        { id: 2,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
-        { id: 3,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
+    // const orders = [
+    //     { id: 1,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
+    //     { id: 2,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
+    //     { id: 3,item:inhailer ,itemName:"SEROFLO-125 INHALER",qty:"2",price:"650",status:"shipped",date:"03/03/2024",paymentType:"Cash" },
         
        
-    ];
+    // ];
 
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
@@ -35,8 +43,13 @@ const MyOrders = () => {
         setPage(0);
     };
 
-    const filteredOrders = orders.filter((orders) =>
-        orders.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOrders = myorder.filter((orders) =>
+        {
+
+            //orders.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+
+            return true;
+        }
     );
 
 
@@ -60,11 +73,28 @@ const MyOrders = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
+    {filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((order) => (
+        order.order_details.map((detail) => (
+            <TableRow key={detail.id}>
+                <TableCell>{order.id}</TableCell>
+                <TableCell><img src={detail.product.image} width={'20%'} alt={detail.product.product_name} /></TableCell>
+                <TableCell>{detail.product.product_name}</TableCell>
+                <TableCell>{detail.quantity}</TableCell>
+                <TableCell>{detail.price}</TableCell>
+                <TableCell>{detail.tax}</TableCell>
+                <TableCell>{order.is_active ? 'Active' : 'Inactive'}</TableCell>
+                <TableCell>{detail.is_active ? 'Active' : 'Inactive'}</TableCell>
+            </TableRow>
+        ))
+    ))}
+</TableBody>
+
+                    {/* <TableBody>
                         {filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((orders) => (
                             <TableRow key={orders.id} >
                                 <TableCell>  {orders.id} </TableCell>
                                 <TableCell>  <img src={orders.item} width={'20%'} alt="" /> </TableCell>
-                                <TableCell>{orders.itemName}</TableCell>
+                                <TableCell>{orders?.order_details?.product?.product_name}</TableCell>
                                 <TableCell>{orders.qty}</TableCell>
 
                                 <TableCell>{orders.price}</TableCell>
@@ -76,7 +106,7 @@ const MyOrders = () => {
 
                             </TableRow>
                         ))}
-                    </TableBody>
+                    </TableBody> */}
                 </Table>
             </TableContainer>
             <TablePagination

@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import Logo from '../../assets/images/medicare1.png';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 
 const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
@@ -17,16 +18,40 @@ const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
     setOpenModal(true);
   };
 
+
+  const BoughtItems = async(data) =>{
+
+    const form ={
+        customerId:1,
+        productId:data.productId,
+        quantity:data.quantity,
+    }
+
+    const response = await buyOrder(form);
+    console.log("response",response);
+
+
+ }
+
+
   const handleCloseModal = () => {
     setOpenModal(false);
   };
   const handleLink = () => {
-<Link to={'/user/buy-now'}/>
+{/* <Link to={'/user/buy-now'}/> */}
 
 };
 
+const {
+  register,
+  control,
+  handleSubmit,
+  formState: { errors },
+} = useForm();
+
   return (
     <div>
+      <form onSubmit={handleSubmit(BoughtItems)}>
       <Card sx={{ borderRadius: 2, boxShadow: 3,p:2}}>
       
 
@@ -60,6 +85,8 @@ const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
 
         </Grid>  
       </Card>
+      </form>
+
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -120,10 +147,9 @@ const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
 
               {/* </div> */}
               <div style={{ width: '100%', display: 'flex', marginTop: 25,justifyContent:'start',gap:5}}>
-                <Button full variant="outlined" onClick={handleCloseModal}>Add to Cart</Button>
-                <Link to={'/user/buy-now'}  >
+                <Button fullWidth variant="outlined" onClick={handleCloseModal}>Add to Cart</Button>
                 <Button fullWidth variant="contained">Buy Now</Button>
-               </Link>
+          
 
               </div>
 
