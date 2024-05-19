@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import React from 'react'
 import ItemCard from '../../../components/ContentCard/ItemCard'
-import inhailer from '../../../assets/images/inhailer.png';
+import ear from '../../../assets/images/inhailer.png';
 const Ent = () => {
 
 

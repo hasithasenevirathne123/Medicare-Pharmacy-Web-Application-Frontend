@@ -38,7 +38,7 @@ const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
     setOpenModal(false);
   };
   const handleLink = () => {
-{/* <Link to={'/user/buy-now'}/> */}
+<Link to={'/user/buy-now'}/>
 
 };
 
@@ -147,9 +147,10 @@ const {
 
               {/* </div> */}
               <div style={{ width: '100%', display: 'flex', marginTop: 25,justifyContent:'start',gap:5}}>
-                <Button fullWidth variant="outlined" onClick={handleCloseModal}>Add to Cart</Button>
+                <Button full variant="outlined" onClick={handleCloseModal}>Add to Cart</Button>
+                <Link to={'/user/buy-now'}  >
                 <Button fullWidth variant="contained">Buy Now</Button>
-          
+               </Link>
 
               </div>
 
