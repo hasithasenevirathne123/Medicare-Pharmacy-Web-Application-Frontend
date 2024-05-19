@@ -1,7 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Pagination, TextField, MenuItem } from '@mui/material';
+import { getOrders } from '../../services/adminService';
+
 
 const Orders = () => {
+
+    const [ordersdata, setOrdersData] = useState([]);
+
+    console.log("response: ", getOrders())
+
+    const getOrdersData = async () => {
+        const response = await getOrders();
+        console.log("Orders: ", response);
+        setOrdersData(response.data.allOrders);
+    };
+
+    useEffect(() => {
+        getOrdersData();
+    }, [])
+
+
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchName, setSearchName] = useState('');
@@ -13,10 +31,10 @@ const Orders = () => {
         setRole(event.target.value);
     };
 
-    const users = [
-        { id: 1, name: 'Jason Stieve', orderId: "2342942sjskd", mobile: '1234567890', contact: '1234567890', email: 'johnDoe@gmail.com', address: '123 Main St', nic: '123456789V', Gender: 'Male', orderStatus: 'Shipped' },
-        // Add more user data as needed
-    ];
+    // const users = [
+    //     { id: 1, name: 'Jason Stieve', orderId: "2342942sjskd", mobile: '1234567890', contact: '1234567890', email: 'johnDoe@gmail.com', address: '123 Main St', nic: '123456789V', Gender: 'Male', orderStatus: 'Shipped' },
+    //     // Add more user data as needed
+    // ];
 
     const handleUpdate = (id) => {
         console.log(`Update user with id ${id}`);
@@ -33,7 +51,7 @@ const Orders = () => {
 
     const indexOfLastUser = currentPage * rowsPerPage;
     const indexOfFirstUser = indexOfLastUser - rowsPerPage;
-    let filteredUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    let filteredUsers = ordersdata.slice(indexOfFirstUser, indexOfLastUser);
 
     if (searchName) {
         filteredUsers = filteredUsers.filter(user =>
@@ -103,28 +121,32 @@ const Orders = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {filteredUsers.map((user) => (
-                                <TableRow key={user.id} >
-                                    <TableCell>{user.id}</TableCell>
-                                    <TableCell>{user.orderId}</TableCell>
-                                    <TableCell> {user.name}</TableCell>
-                                    <TableCell>{user.mobile}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.address}</TableCell>
-                                    <TableCell>{user.nic}</TableCell>
+                            {filteredUsers.map((order) => (
+                                <TableRow key={order.id}>
+                                    <TableCell>{order.customer?.id}</TableCell>
+                                    <TableCell>{order.id}</TableCell>
+                                    <TableCell>{`${order.customer?.first_name} ${order.customer?.last_name}`}</TableCell>
+                                    <TableCell>{order.customer?.mobile_number}</TableCell>
+                                    <TableCell>{order.customer?.user?.email}</TableCell>
+                                    <TableCell>{`${order.customer?.street_address}, ${order.customer?.city}`}</TableCell>
+                                    <TableCell>{order.customer?.nic}</TableCell>
                                     <TableCell>
                                         <TextField
                                             select
-                                            value={user.orderStatus}
+                                            value={order.order_status}
                                             onChange={(e) => {
                                                 const newStatus = e.target.value;
                                                 // Update the order status in your data
                                                 // For now, log the new status
                                                 console.log(`Change order status to ${newStatus}`);
+                                                // Update the order status in the ordersdata
+                                                const updatedOrders = ordersdata.map(o =>
+                                                    o.id === order.id ? { ...o, order_status: newStatus } : o
+                                                );
+                                                setOrdersdata(updatedOrders);
                                             }}
                                             fullWidth
                                             variant="outlined"
-                                            
                                         >
                                             <MenuItem value="Shipped">Shipped</MenuItem>
                                             <MenuItem value="Pending">Pending</MenuItem>
@@ -137,7 +159,7 @@ const Orders = () => {
                     </Table>
                 </TableContainer>
                 <Pagination
-                    count={Math.ceil(users.length / rowsPerPage)}
+                    count={Math.ceil(ordersdata.length / rowsPerPage)}
                     page={currentPage}
                     onChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
