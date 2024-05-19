@@ -123,7 +123,7 @@ const ItemCard = ({ img ,category,rating,name,price,disabled,active}) => {
                 <Button full variant="outlined" onClick={handleCloseModal}>Add to Cart</Button>
                 <Link to={'/user/buy-now'}  >
                 <Button fullWidth variant="contained">Buy Now</Button>
-</Link>
+               </Link>
 
               </div>
 

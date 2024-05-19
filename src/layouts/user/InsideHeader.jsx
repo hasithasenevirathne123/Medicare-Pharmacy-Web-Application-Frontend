@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import baby from '../../assets/images/baby2.png';
 import nurology from '../../assets/images/brain.png';
 import ent from '../../assets/images/ear2.png';
@@ -14,6 +14,8 @@ import Card from '../../components/ContentCard/Card3';
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import skin from '../../assets/images/skin3.png';
+import { getAllProductsForCustomerDashboard } from '../../services/customerService';
+import { useSelector } from 'react-redux';
 
 const InsideHeader = () => {
     const settings = {
@@ -52,6 +54,27 @@ const InsideHeader = () => {
           }
         ]
       };
+
+
+  //const[allproducts, setAllProducts] = useState([]);
+  const[category, setCategory] = useState([]);
+
+ const customerId = useSelector((state)=> state.user.userDetails.userId);
+ //console.log("all products",customerId)
+  const getProducts = async() => {
+     try {
+      const response = await getAllProductsForCustomerDashboard(customerId);
+      console.log("all products",response);
+      setCategory(response?.data?.categoryDetails);
+      
+     } catch (error) {
+      console.log("error",error);
+     }
+  }
+
+  useEffect(()=>{
+     getProducts();
+  },[])
   return (
     <>
         
@@ -63,7 +86,13 @@ const InsideHeader = () => {
           display: 'none',
         }
       }}>
-        <Card img={Heart} name="Heart" color="#e3f0ff" w='65' path="/user/medicine/heart"/>
+      
+        <Card 
+        img={Heart}
+        name="Heart" 
+         color="#e3f0ff" w='65'
+          path="/user/medicine/heart"/>
+
         <Card img={eye} name="Eye" color="#fed1de" w='80'path="/user/medicine/eye" />
         <Card img={ent} name="ENT" color="#f0dafc" w='108' path="/user/medicine/ent" />
         <Card img={vita} name="Vitamins" color="#e3f0ff" w='102' path="/user/medicine/vitamin" />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid } from '@mui/material';
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
@@ -14,6 +14,10 @@ import Banner3 from '../../assets/images/banner4.png'
 
 import ItemCard from '../../components/ContentCard/ItemCard';
 import Slider from 'react-slick';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { getAllProductsForCustomerDashboard } from '../../services/customerService';
+import { useSelector } from 'react-redux';
 
 
 
@@ -54,12 +58,30 @@ const Dashboard = () => {
       }
     ]
   };
+  const navigate = useNavigate();
+
+  const[allproducts, setAllProducts] = useState([]);
+  const[category, setCategory] = useState([]);
+
+ const customerId = useSelector((state)=> state.user.userDetails.userId);
+ //console.log("all products",customerId)
+  const getProducts = async() => {
+     try {
+      const response = await getAllProductsForCustomerDashboard(customerId);
+      console.log("all products",response);
+      setAllProducts(response?.data?.allProducts);
+      
+     } catch (error) {
+      console.log("error",error);
+     }
+  }
+
+  useEffect(()=>{
+     getProducts();
+  },[])
 
   return (
     <>   
-    
-      
-
     <div style={{overflowX:'hidden',overflowY:'hidden'}}>
         <Slider  {...settings}>
           <div> <img src={Banner1} alt="" /></div>
@@ -73,18 +95,18 @@ const Dashboard = () => {
           
         </Slider>
       </div>
-
-      
-       
-
-
-
-
       <Grid container p={3} spacing={2}>
-        <Grid item md={3}>
-          <ItemCard img={inhailer} category="Heart"rating="4.5" name="SEROFLO-125 INHALER"price="650/=" />
+        {allproducts.map((products, key)=>(
+      <Grid item md={3} key={key}>
+      <ItemCard 
+          img={products.image}
+          category={products.category_name} 
+          rating="4.5" 
+          name={products.product_name}
+          price={products.price} />
         </Grid>
-        <Grid item md={3}>
+        ))}
+        {/* <Grid item md={3}>
           <ItemCard img={eyemed} category="Eye"rating="4.5" name="p-acuvail-eye-drops" disabled="true" active="Out of stock"/>
         </Grid>
         <Grid item md={3}>
@@ -128,7 +150,7 @@ const Dashboard = () => {
         </Grid>
         <Grid item md={3}>
           <ItemCard img={entmed} category="Ent"rating="4.5" name="flutimate-nasal-spray"price="1103/=" />
-        </Grid>
+        </Grid> */}
        
       </Grid>
     </>

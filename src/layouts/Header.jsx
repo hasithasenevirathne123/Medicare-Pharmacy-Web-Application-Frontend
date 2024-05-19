@@ -7,7 +7,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../assets/images/medicare1.png';
 import loginimg from '../assets/images/LPI.png';
 import shadow from '../assets/images/shadow2.png';
+import { useForm } from 'react-hook-form';
 
+import { useDispatch } from 'react-redux';
+import { showAlertMessage } from '../app/alertMessageController';
+import { setAccessToken, setRefreshToken, setuserDetails } from '../reducers/userslice';
+import { UserLogin } from '../services/userservice';
 
 
 function Header() {
@@ -19,6 +24,7 @@ function Header() {
   const [businessAcc, setBusinessAcc] = useState(false);
   const [loginSignup, setloginSignup] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [activeButton, setActiveButton] = useState('personal');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -43,6 +49,51 @@ function Header() {
     whiteSpace: 'nowrap',
     width: 1,
   });
+
+
+  const[username, setuser] = useState("");
+  const[password, setpass] = useState("");
+
+
+  const handleLogin = async() =>{
+    try 
+    {
+      const response = await UserLogin(username, password);
+      console.log("response", response);
+      let userDetails = {
+        lastName:response?.data?.last_name,
+        userId:"",
+
+      };
+
+      if(response.data.user.user_type_id){
+        userDetails.userId = response?.data?.customer?.id;
+      }
+
+      if(response?.responseCode === 1000){
+        showAlertMessage({
+          message:"Login successful",
+          type:"success"
+        });
+        dispatch(setAccessToken({key:response?.data?.token}));
+        dispatch(setRefreshToken({key:response?.data?.refresh}));
+        dispatch(setuserDetails(userDetails));
+        console.log("User Details", userDetails);
+        localStorage.setItem("jwtoken",response?.data?.token);
+        
+        if(response.data.user.user_type_id === 2){
+            navigate("user/dashboard");
+        }
+        // else if(response.data.user.user_type_id === 1){
+        //    navigate("admin/dashboard");
+        // }
+       
+      }
+      
+    } catch (error) {
+      console.log("error",error);
+    }
+  }
 
 
   const handleButtonClick = (type) => {
@@ -114,39 +165,62 @@ function Header() {
     setOpen(false); // Close the sidebar when a link is clicked
   };
 
-  const LoginBtnOnclick=()=>{
-    handleLoginClose();
-    navigate( "/user/dashboard" )
-  }
+  // const LoginBtnOnclick=()=>{
+  //   handleLoginClose();
+  //   navigate( "/user/dashboard" )
+  // }
+
+
+  const {
+    register,
+    handleSubmit,
+    formState:{errors},
+  } = useForm();
 
   return (
     <Box
       sx={{
-        backgroundColor: '#f5f5f5',
+        backgroundColor: "#f5f5f5",
       }}
     >
       <Grid container p={1}>
         {/* Logo */}
-        <Grid item xs={11} md={9} display={'flex'} justifyContent={'start'} alignItems={'center'} >
+        <Grid
+          item
+          xs={11}
+          md={9}
+          display={"flex"}
+          justifyContent={"start"}
+          alignItems={"center"}
+        >
           <Link to="/">
-            <img src={Logo} width={'30%'} alt="" />
+            <img src={Logo} width={"30%"} alt="" />
           </Link>
         </Grid>
 
-
-
-
-
-
-        <Grid item md={3} display={{ xs: 'none', sm: 'none', md: 'flex', lg: 'flex' }} spacing={2} >
-          <Button variant="outlined" onClick={handleLoginToggle} fullWidth  sx={{ marginRight: 2 }} >Login</Button>
-          <Button variant="contained" fullWidth onClick={handlePersonalAccToggle}>Signup</Button>
+        <Grid
+          item
+          md={3}
+          display={{ xs: "none", sm: "none", md: "flex", lg: "flex" }}
+          spacing={2}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleLoginToggle}
+            fullWidth
+            sx={{ marginRight: 2 }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handlePersonalAccToggle}
+          >
+            Signup
+          </Button>
         </Grid>
-
-
-
       </Grid>
-
 
       {/* Login Modal */}
       <Modal
@@ -161,130 +235,245 @@ function Header() {
         <Fade in={loginOpen}>
           <Box
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              bgcolor: 'background.paper',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
               boxShadow: 24,
               p: 3,
-              minWidth: { xs: '300px', sm: '400px', md: '700px', lg: '850px', xl: '1000px' },
+              minWidth: {
+                xs: "300px",
+                sm: "400px",
+                md: "700px",
+                lg: "850px",
+                xl: "1000px",
+              },
 
               borderRadius: 2,
-
-
-
             }}
           >
-            <Grid item display={'flex'} justifyContent={'end'}>
+            <Grid item display={"flex"} justifyContent={"end"}>
               {/* Colse btn */}
-              <IconButton onClick={handleCloseLoginToggle} color="primary" aria-label="add to shopping cart">
+              <IconButton
+                onClick={handleCloseLoginToggle}
+                color="primary"
+                aria-label="add to shopping cart"
+              >
                 <CloseIcon />
               </IconButton>
             </Grid>
 
-            <Grid container spacing={1} >
+            <Grid container spacing={1}>
               {/* modal image */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} display={{ xs: 'none', sm: 'none', md: 'flex', lg: 'flex' }} justifyContent={'start'} alignItems={'start'}>
-                <img src={loginimg} width={'90%'} alt="" />
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                display={{ xs: "none", sm: "none", md: "flex", lg: "flex" }}
+                justifyContent={"start"}
+                alignItems={"start"}
+              >
+                <img src={loginimg} width={"90%"} alt="" />
               </Grid>
-              <Grid item xs={1} sm={1} md={1} lg={1} xl={1} display={'flex'} justifyContent={'center'} alignContent={'center'} >
-                <img src={shadow} heigh={'1px'} alt="" />
+              <Grid
+                item
+                xs={1}
+                sm={1}
+                md={1}
+                lg={1}
+                xl={1}
+                display={"flex"}
+                justifyContent={"center"}
+                alignContent={"center"}
+              >
+                <img src={shadow} heigh={"1px"} alt="" />
               </Grid>
 
               {/* Modal content */}
-              <Grid item xs={11} sm={11} md={5} lg={5} xl={5} display={'flex'} justifyContent={'center'} alignContent={'center'} >
+              <Grid
+                item
+                xs={11}
+                sm={11}
+                md={5}
+                lg={5}
+                xl={5}
+                display={"flex"}
+                justifyContent={"center"}
+                alignContent={"center"}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: "#eceff1",
+                    borderRadius: 2,
+                    padding: 2,
+                    width: "100%",
+                  }}
+                >
+                  {/* //login */}
+                  <form onSubmit={handleSubmit(handleLogin)} data-aos="fade-left">
 
-                <Box sx={{ backgroundColor: '#eceff1', borderRadius: 2, padding: 2, width: '100%' }} >
-                  <Grid item display={'flex'} justifyContent={'center'} flexDirection={'column'} >
-
-                    <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'} mt={2} >
-                      <img src={Logo} width={'50%'} alt="" />
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    flexDirection={"column"}
+                  >
+                    <Grid
+                      item
+                      display={"flex"}
+                      justifyContent={"center"}
+                      alignItems={"center"}
+                      mt={2}
+                    >
+                      <img src={Logo} width={"50%"} alt="" />
                     </Grid>
 
-
-                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'} mt={2}>
-
-                      <Typography variant='subtitle2'
-                        sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                        Enter Email  <span style={{ color: '#0070C0' }}>*</span></Typography>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={12}
+                      md={12}
+                      lg={12}
+                      xl={12}
+                      flexDirection={"column"}
+                      display={"flex"}
+                      justifyContent={"center"}
+                      alignItems={"start"}
+                      mt={2}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontSize: {
+                            xs: "13px",
+                            sm: "13px",
+                            md: "13px",
+                            lg: "13px",
+                            xl: "15px",
+                          },
+                        }}
+                        fontWeight={600}
+                      >
+                        Enter Email <span style={{ color: "#0070C0" }}>*</span>
+                      </Typography>
                       <TextField
-                        id="outlined-basic"
+                      onChange={(e)=>setuser(e.target.value)}
+                      value={username}
+                  
+                        //id="outlined-basic"
+                       // value={username}
                         // label="Tp Number"
                         variant="outlined"
                         fullWidth
                         sx={{
-                          '& .MuiOutlinedInput-root': {
+                          "& .MuiOutlinedInput-root": {
                             // height: '35px', // Set the desired height
                           },
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#757575',
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#757575",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'} mt={1}>
-
-                      <Typography variant='subtitle2'
-                        sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                        Enter Password  <span style={{ color: '#0070C0' }}>*</span></Typography>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={12}
+                      md={12}
+                      lg={12}
+                      xl={12}
+                      flexDirection={"column"}
+                      display={"flex"}
+                      justifyContent={"center"}
+                      alignItems={"start"}
+                      mt={1}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontSize: {
+                            xs: "13px",
+                            sm: "13px",
+                            md: "13px",
+                            lg: "13px",
+                            xl: "15px",
+                          },
+                        }}
+                        fontWeight={600}
+                      >
+                        Enter Password{" "}
+                        <span style={{ color: "#0070C0" }}>*</span>
+                      </Typography>
                       <TextField
                         id="outlined-basic"
                         // label="Tp Number"
-                        type='password'
+                        value={password}
+                        onChange={(e)=>setpass(e.target.value)}
+                        type="password"
                         variant="outlined"
                         fullWidth
                         sx={{
-                          '& .MuiOutlinedInput-root': {
+                          "& .MuiOutlinedInput-root": {
                             // height: '35px', // Set the desired height
                           },
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#757575',
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#757575",
                           },
                         }}
                       />
                     </Grid>
 
-
-
-                    <Grid container alignItems="center" justifyContent="space-between" >
+                    <Grid
+                      container
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
                       <Grid item>
                         <FormControlLabel
                           control={<Checkbox defaultChecked />}
                           label="Remember Me"
-
                         />
                       </Grid>
                       <Grid item>
-                        <Typography variant="body2" color="primary">Forgot Password?</Typography>
+                        <Typography variant="body2" color="primary">
+                          Forgot Password?
+                        </Typography>
                       </Grid>
                     </Grid>
 
-
-
-
-
-
-                      <Button fullWidth variant="contained" onClick={handleClose} sx={{
-                        mt: 5, '&:hover': { backgroundColor: 'primary.main' },
-                        fontSize: { xs: '17px', sm: '17px', md: '17px', lg: '14px', xl: '23px' }
-                      }} onClick={LoginBtnOnclick} >Login</Button>
-
-
-
-
-
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      onClick={handleLogin}
+                      sx={{
+                        mt: 5,
+                        "&:hover": { backgroundColor: "primary.main" },
+                        fontSize: {
+                          xs: "17px",
+                          sm: "17px",
+                          md: "17px",
+                          lg: "14px",
+                          xl: "23px",
+                        },
+                      }}
+                    >
+                      Login
+                    </Button>
 
                   </Grid>
+                  </form>
+                  {/* //login */}
                 </Box>
               </Grid>
-
             </Grid>
           </Box>
         </Fade>
       </Modal>
-
 
       {/*  register  Modal */}
       <Modal
@@ -299,88 +488,144 @@ function Header() {
         <Fade in={personalAcc}>
           <Box
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              bgcolor: 'background.paper',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
               boxShadow: 24,
               p: 3,
-              minWidth: { xs: '300px', sm: '400px', md: '900px', lg: '800px', xl: '1500px' },
-              minHeight: { xs: '500px', sm: '400px', md: '500px', lg: '400px', xl: '600px' },
-              maxHeight: { xs: '600px', sm: '500px', md: '50px', lg: '600px', xl: '600px' },
-              overflowY: 'auto',  // Make the box scrollable if y-axis overflows
+              minWidth: {
+                xs: "300px",
+                sm: "400px",
+                md: "900px",
+                lg: "800px",
+                xl: "1500px",
+              },
+              minHeight: {
+                xs: "500px",
+                sm: "400px",
+                md: "500px",
+                lg: "400px",
+                xl: "600px",
+              },
+              maxHeight: {
+                xs: "600px",
+                sm: "500px",
+                md: "50px",
+                lg: "600px",
+                xl: "600px",
+              },
+              overflowY: "auto", // Make the box scrollable if y-axis overflows
               borderRadius: 2,
 
-              '&::-webkit-scrollbar': {
-                width: '0 !important',  // Hide the scrollbar
+              "&::-webkit-scrollbar": {
+                width: "0 !important", // Hide the scrollbar
               },
-              '&::-webkit-scrollbar-thumb': {
-                display: 'none',  // Hide the scrollbar thumb
+              "&::-webkit-scrollbar-thumb": {
+                display: "none", // Hide the scrollbar thumb
               },
             }}
           >
             <Grid container>
-              <Grid item xs={9} >
-                <img src={Logo} width={'20%'} alt="" />
+              <Grid item xs={9}>
+                <img src={Logo} width={"20%"} alt="" />
               </Grid>
-
-
-              <Grid item xs={3} display={'flex'} justifyContent={'end'}>
-
-                <IconButton onClick={handleClosePersonalAccToggle} color="primary" aria-label="add to shopping cart">
+              <Grid item xs={3} display={"flex"} justifyContent={"end"}>
+                <IconButton
+                  onClick={handleClosePersonalAccToggle}
+                  color="primary"
+                  aria-label="add to shopping cart"
+                >
                   <CloseIcon />
                 </IconButton>
               </Grid>
-
-
-
-
             </Grid>
-
-
 
             {/* Personal account Modal content */}
             <Grid container spacing={1} rowGap={1} mt={1}>
-
               {/*  First Name  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'}>
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  First Name  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"start"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  First Name <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575', // Set the border color
-                    }
+                    },
                   }}
                 />
               </Grid>
 
               {/*  Last Name  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'}>
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  Last Name  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"start"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  Last Name <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
@@ -388,42 +633,87 @@ function Header() {
               </Grid>
 
               {/* Mobile Number field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'}>
-
-                <Typography variant='subtitle2' sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  Mobile Number <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"start"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  Mobile Number <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
                 />
               </Grid>
 
-
               {/* Email  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} display={'flex'} justifyContent={'center'} alignItems={'start'}>
-
-                <Typography variant='subtitle2' sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  Email  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"start"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  Email <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
@@ -431,22 +721,41 @@ function Header() {
               </Grid>
 
               {/*  Street Address  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} >
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  Street Address  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  Street Address <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      width: 'auto', // Set the desired width
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      width: "auto", // Set the desired width
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
@@ -454,22 +763,41 @@ function Header() {
               </Grid>
 
               {/*  City  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} >
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  City  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  City <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      width: 'auto', // Set the desired width
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      width: "auto", // Set the desired width
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
@@ -477,55 +805,97 @@ function Header() {
               </Grid>
 
               {/*  NIC Number  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} >
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  NIC Number  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  NIC Number <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      width: 'auto', // Set the desired width
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      width: "auto", // Set the desired width
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
+                    "& .MuiOutlinedInput-notchedOutline": {
                       // borderColor: '#757575',
                     },
                   }}
                 />
               </Grid>
 
-
-
               {/*  Gender  field */}
-              <Grid item xs={12} sm={12} md={6} lg={6} xl={6} flexDirection={'column'} >
-
-                <Typography variant='subtitle2'
-                  sx={{ fontSize: { xs: '13px', sm: '13px', md: '13px', lg: '13px', xl: '15px' } }} fontWeight={600}>
-                  Gender  <span style={{ color: '#0070C0' }}>*</span></Typography>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={6}
+                lg={6}
+                xl={6}
+                flexDirection={"column"}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: {
+                      xs: "13px",
+                      sm: "13px",
+                      md: "13px",
+                      lg: "13px",
+                      xl: "15px",
+                    },
+                  }}
+                  fontWeight={600}
+                >
+                  Gender <span style={{ color: "#0070C0" }}>*</span>
+                </Typography>
                 <TextField
                   id="outlined-basic"
                   // label="Tp Number"
                   variant="outlined"
                   fullWidth
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      width: 'auto', // Set the desired width
-                      height: '35px', // Set the desired height
+                    "& .MuiOutlinedInput-root": {
+                      width: "auto", // Set the desired width
+                      height: "35px", // Set the desired height
                     },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                    },
+                    "& .MuiOutlinedInput-notchedOutline": {},
                   }}
                 />
               </Grid>
 
-
               {/* Terms & Conditions Checkbox */}
-              <Grid item xs={12} sm={12} md={12} lg={12} xl={12} flexDirection={'column'} >
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={12}
+                lg={12}
+                xl={12}
+                flexDirection={"column"}
+              >
                 <FormControlLabel
                   control={<Checkbox />}
                   label="I have read and agree to Terms & Conditions"
@@ -533,40 +903,35 @@ function Header() {
               </Grid>
 
               {/* Submit btn */}
-              <Grid item xs={12} sm={12} md={12} lg={12} xl={12} flexDirection={'column'} display={'flex'} justifyContent={'end'} alignItems={'end'}>
-
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={12}
+                lg={12}
+                xl={12}
+                flexDirection={"column"}
+                display={"flex"}
+                justifyContent={"end"}
+                alignItems={"end"}
+              >
                 <Button
                   variant="contained"
                   disableElevation
                   onClick={handleClosePersonalAccToggle}
-
                   sx={{
-                    '&:hover': {
-                      backgroundColor: '#1976d2', // Primary color
+                    "&:hover": {
+                      backgroundColor: "#1976d2", // Primary color
                     },
                   }}
                 >
                   Signup
                 </Button>
               </Grid>
-
-
             </Grid>
-
-
-
-
-
-
-
-
           </Box>
         </Fade>
       </Modal>
-
-
-
-
     </Box>
   );
 }
