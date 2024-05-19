@@ -9,14 +9,19 @@ import man from '../../assets/images/avatar2.png'
 import Category from '../../assets/images/category.png'
 import Orders from '../../assets/images/orders1.png'
 import Pending from '../../assets/images/pending.png'
+<<<<<<< HEAD
 import { getDashboardData } from '../../services/adminService';
 import { useSelector } from 'react-redux';
 // import '../../services/adminService'
+=======
+import { useSelector } from 'react-redux';
+>>>>>>> 42386983cd0f7c41206b073979680b862a69b38f
 
 
 
 const Dashboard = () => {
 
+<<<<<<< HEAD
   const adminId = useSelector((state) => state.user.userDetails.userId);
   const [dashboarddata, setDashboardData] = useState([]);
 
@@ -32,6 +37,19 @@ const Dashboard = () => {
   useEffect(() => {
     getAdminDashboardData();
   }, [adminId])
+=======
+
+  const customerId = useSelector((state)=> state.user.userDetails.userId);
+
+  const[customercount, setCustomerCount] = useState([]);
+
+  const getCustomerCountData = async ()=>{
+
+  }
+  useEffect(()=>{
+    getCustomerCountData
+  },[])
+>>>>>>> 42386983cd0f7c41206b073979680b862a69b38f
 
   useEffect(() => {
     const map = L.map('map').setView([7.8731, 80.7718], 7); // Sri Lanka coordinates and zoom level
