@@ -17,20 +17,29 @@ const getPrescriptionInfo = async(customerId) => {
     return response;
 }
 
-const getOrderData = async(data) => {
-const response = await getData(`/order/place-order`,data);
+const getOrderData = async(customerId) => {
+const response = await getData(`/order/get-user-orders/${customerId}`);
 return response;
 }
 
 
-// const getProductImage = async(ImageName) => {
+const buyOrder = async(data)=>{
+const response = await postData(`/order/place-order`,data);
+return response;
+}
 
-//     const response = await getData(`/product/get-product-image/${ImageName}`);
-//     return response;
-// }
+const getCategoryImage = async(imageName) => {
+    const response = await(`/category/get-category-image/${imageName}`);
+    return response;
+}
+
+
+
 
 export {getAllProductsForCustomerDashboard,
     savePrescriptionFile,
     getPrescriptionInfo,
-    getOrderData
+    getOrderData,
+    buyOrder,
+    getCategoryImage
 }

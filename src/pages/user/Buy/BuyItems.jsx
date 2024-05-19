@@ -12,8 +12,28 @@ import Cod from '../../../assets/images/cod1.png';
 
 
 import ContainerForm from '../../../components/ContainerForm/ContainerForm';
+import { buyOrder } from '../../../services/customerService';
 
 const BuyItems = () => {
+
+     const BoughtItems = async(data) =>{
+
+        const form ={
+            customerId:1,
+            productId:data.productId,
+            quantity:data.quantity,
+        }
+
+        const response = await buyOrder(form);
+        console.log("response",response);
+
+
+     }
+
+
+
+
+
     const [orders, setOrders] = useState([
         { id: 1, item: inhailer, itemName: "SEROFLO-125 INHALER", qty: "2", price: "650", total: "1400", tax: "100" },
         { id: 2, item: inhailer, itemName: "SEROFLO-125 INHALER", qty: "2", price: "650", total: "1400", tax: "100" },
