@@ -1,6 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Pagination, TextField, Chip, Button, MenuItem, Select, Modal, Box, Divider } from '@mui/material';
+import { getCustomers } from '../../services/adminService';
 const Customers = () => {
+
+
+    const [customerdata, setCustomerData] = useState([]);
+
+    console.log("response: ", getCustomers())
+
+    const getCustomerData = async () => {
+        const response = await getCustomers();
+        console.log("Customers: ", response);
+        setCustomerData(response.data.allCustomers);
+    };
+
+    useEffect(() => {
+        getCustomerData();
+    }, [])
+
+
+
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchName, setSearchName] = useState('');
@@ -33,7 +52,7 @@ const Customers = () => {
 
     const indexOfLastUser = currentPage * rowsPerPage;
     const indexOfFirstUser = indexOfLastUser - rowsPerPage;
-    let filteredUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    let filteredUsers = customerdata.slice(indexOfFirstUser, indexOfLastUser);
 
     if (searchName) {
         filteredUsers = filteredUsers.filter(user =>
@@ -101,26 +120,25 @@ const Customers = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {filteredUsers.map((user) => (
-                                <TableRow key={user.id} >
-                                    <TableCell>{user.id}</TableCell>
+                            {filteredUsers.map((customer) => (
+                                <TableRow key={customer.id}>
+                                    <TableCell>{customer.id}</TableCell>
                                     <TableCell>
-                                    {user.name}
-                                    
+                                        {`${customer.first_name} ${customer.last_name}`}
                                     </TableCell>
-                                    <TableCell>{user.mobile}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.address}</TableCell>
-                                    <TableCell>{user.nic}</TableCell>
-                                    <TableCell>{user.Gender}</TableCell>
-
+                                    <TableCell>{customer.mobile_number}</TableCell>
+                                    <TableCell>{customer.user?.email}</TableCell>
+                                    <TableCell>{`${customer.street_address}, ${customer.city}`}</TableCell>
+                                    <TableCell>{customer.nic}</TableCell>
+                                    <TableCell>{customer.gender}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
+
                     </Table>
                 </TableContainer>
                 <Pagination
-                    count={Math.ceil(users.length / rowsPerPage)}
+                    count={Math.ceil(customerdata.length / rowsPerPage)}
                     page={currentPage}
                     onChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
@@ -129,7 +147,7 @@ const Customers = () => {
                     rowsPerPageOptions={[5, 10, 25]}
                 />
             </Grid>
-           
+
 
         </>
     );
