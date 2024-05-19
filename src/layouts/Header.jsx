@@ -27,7 +27,7 @@ function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState(''); // Add state variables for form fields
+  const [firstName, setFirstName] = useState(""); // Add state variables for form fields
   const [lastName, setLastName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -234,8 +234,8 @@ function Header() {
       const userData = {
         email : email,
         password : password,
-        firstName : firstName,
-        lastName : lastName,
+        first_name : firstName,
+        last_name : lastName,
         userTypeId : 2,
         mobileNumber : mobileNumber,
         streetAddress : streetAddress,
