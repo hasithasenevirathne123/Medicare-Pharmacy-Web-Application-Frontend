@@ -1,17 +1,4 @@
-<<<<<<< HEAD
-import { getData } from "../api/Methods/methods";
-
-
-
-const getcustomerCount = async(adminId)=>{
-const response = await getData(`/admin/get-details-to-admin-dashboard/${adminId}`);
-return response;
-}
-
-export{getcustomerCount}
-=======
 import { getData, postData } from "../api/Methods/methods";
-
 
 const getDashboardData = async(adminId) => {
 
@@ -31,5 +18,14 @@ const getCustomers = async() => {
     return response;
 }
 
-export {getDashboardData,getOrders,getCustomers}
->>>>>>> d19096fdcbf1e0684f553e5d731ecc9d48fb24d5
+const addProduct = async(data) => {
+
+    const response = await postData(`/admin/add-new-product`, data, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
+
+export {getDashboardData,getOrders,getCustomers,addProduct}

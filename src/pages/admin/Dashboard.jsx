@@ -9,19 +9,12 @@ import man from '../../assets/images/avatar2.png'
 import Category from '../../assets/images/category.png'
 import Orders from '../../assets/images/orders1.png'
 import Pending from '../../assets/images/pending.png'
-<<<<<<< HEAD
 import { useSelector } from 'react-redux';
-=======
-import { getDashboardData } from '../../services/adminService';
-import { useSelector } from 'react-redux';
-// import '../../services/adminService'
->>>>>>> d19096fdcbf1e0684f553e5d731ecc9d48fb24d5
 
 
 
 const Dashboard = () => {
 
-<<<<<<< HEAD
 
   const customerId = useSelector((state)=> state.user.userDetails.userId);
 
@@ -33,23 +26,6 @@ const Dashboard = () => {
   useEffect(()=>{
     getCustomerCountData
   },[])
-=======
-  const adminId = useSelector((state) => state.user.userDetails.userId);
-  const [dashboarddata, setDashboardData] = useState([]);
-
-  console.log("response: ", getDashboardData(adminId))
-
-  const getAdminDashboardData = async () => {
-    const response = await getDashboardData(adminId);
-    // console.log(adminId);
-    // console.log("CustomerCount: ", response);
-    setDashboardData(response.data);
-  };
-
-  useEffect(() => {
-    getAdminDashboardData();
-  }, [adminId])
->>>>>>> d19096fdcbf1e0684f553e5d731ecc9d48fb24d5
 
   useEffect(() => {
     const map = L.map('map').setView([7.8731, 80.7718], 7); // Sri Lanka coordinates and zoom level
