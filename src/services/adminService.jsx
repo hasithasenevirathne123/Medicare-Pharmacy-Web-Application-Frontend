@@ -7,16 +7,16 @@ const getDashboardData = async(adminId) => {
     return response;
 }
 
-// const savePrescriptionFile = async(data) =>{
-//     const response = await postData(`/prescription/save-prescription`,data);
-//     return response;
-// }
+const getOrders = async() => {
 
+    const response = await getData(`/admin/get-all-orders`);
+    return response;
+}
 
-// const getProductImage = async(ImageName) => {
+const getCustomers = async() => {
 
-//     const response = await getData(`/product/get-product-image/${ImageName}`);
-//     return response;
-// }
+    const response = await getData(`/admin/get-all-customers`);
+    return response;
+}
 
-export {getDashboardData}
+export {getDashboardData,getOrders,getCustomers}
