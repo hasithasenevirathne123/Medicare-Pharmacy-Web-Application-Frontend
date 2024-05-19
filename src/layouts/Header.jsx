@@ -67,7 +67,12 @@ function Header() {
       };
 
       if(response.data.user.user_type_id){
-        userDetails.userId = response?.data?.customer?.id;
+        if(response.data.user.user_type_id === 1){
+          userDetails.userId = response?.data?.admin?.id;
+        }
+        else if(response.data.user.user_type_id === 2){
+          userDetails.userId = response?.data?.customer?.id;
+        }
       }
 
       if(response?.responseCode === 1000){
@@ -84,9 +89,9 @@ function Header() {
         if(response.data.user.user_type_id === 2){
             navigate("user/dashboard");
         }
-        // else if(response.data.user.user_type_id === 1){
-        //    navigate("admin/dashboard");
-        // }
+        else if(response.data.user.user_type_id === 1){
+           navigate("admin/dashboard");
+        }
        
       }
       
