@@ -19,4 +19,14 @@ const getCustomers = async() => {
     return response;
 }
 
-export {getDashboardData,getOrders,getCustomers}
+const addProduct = async(data) => {
+
+    const response = await postData(`/admin/add-new-product`, data, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
+
+export {getDashboardData,getOrders,getCustomers,addProduct}
