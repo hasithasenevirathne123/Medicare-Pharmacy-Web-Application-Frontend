@@ -1,20 +1,39 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import banner from '../../../assets/images/orderbanner.png'
 import { Box, Button, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TextField, Avatar } from '@mui/material'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { getPrescriptionInfo } from '../../../services/customerService'
 
 const PrescriptionMain = () => {
 
-  const orders = [
-    { id: 1, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
-    
-    { id: 2, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
-    { id: 3, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
-    { id: 4, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
-    { id: 5, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
-    { id: 6, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
 
-  ];
+  const customerId = useSelector((state)=> state.user.userDetails.userId);
+  const[prescriptiondata, setPrescriptionData] = useState([]);
+
+  const getPrecriptionData = async () => {
+    const response = await getPrescriptionInfo(customerId);
+    console.log("prescription data",response);
+    setPrescriptionData(response?.data?.prescription);
+
+  };
+  useEffect(()=>{
+ getPrecriptionData();
+  },[]);
+
+
+
+
+  // const orders = [
+  //   { id: 1, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+    
+  //   { id: 2, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+  //   { id: 3, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+  //   { id: 4, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+  //   { id: 5, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+  //   { id: 6, frequency: "One Time",Fulfilment:'full', description: "Crestor 10mg – 10 Qty", substitutes: "no", options: "Card Payment", status: "shipped" },
+
+  // ];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
@@ -29,8 +48,12 @@ const PrescriptionMain = () => {
     setPage(0);
   };
 
-  const filteredOrders = orders.filter((order) =>
-    order.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = prescriptiondata.filter((order) =>{
+
+   // order.description.toLowerCase().includes(searchTerm.toLowerCase())
+  
+  return true;
+  }
   );
 
   return (
@@ -71,14 +94,14 @@ const PrescriptionMain = () => {
             </TableHead>
             <TableBody>
               {filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((order) => (
-                <TableRow key={order.id} >
-                  <TableCell>{order.id}</TableCell>
-                  <TableCell>{order.frequency}</TableCell>
-                  <TableCell>{order.Fulfilment}</TableCell>
-                  <TableCell>{order.description}</TableCell>
-                  <TableCell>{order.substitutes}</TableCell>
-                  <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.options}</TableCell>
+                <TableRow key={order?.id} >
+                  <TableCell>{order?.id}</TableCell>
+                  <TableCell>{order?.frequency}</TableCell>
+                  <TableCell>{order?.fulfilment}</TableCell>
+                  <TableCell>{order?.prescription_item}</TableCell>
+                  <TableCell>{order?.substitutes}</TableCell>
+                  <TableCell>{order?.status}</TableCell>
+                  <TableCell>{order?.payment_method}</TableCell>
 
                 </TableRow>
               ))}

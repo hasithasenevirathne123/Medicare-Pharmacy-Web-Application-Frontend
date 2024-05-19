@@ -1,5 +1,5 @@
 import { Grid, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import TotalCountCard from '../../components/ContentCard/TotalCountCard'
 import ContainerForm from '../../components/ContainerForm/ContainerForm'
 import L from 'leaflet';
@@ -9,10 +9,23 @@ import man from '../../assets/images/avatar2.png'
 import Category from '../../assets/images/category.png'
 import Orders from '../../assets/images/orders1.png'
 import Pending from '../../assets/images/pending.png'
+import { useSelector } from 'react-redux';
 
 
 
 const Dashboard = () => {
+
+
+  const customerId = useSelector((state)=> state.user.userDetails.userId);
+
+  const[customercount, setCustomerCount] = useState([]);
+
+  const getCustomerCountData = async ()=>{
+
+  }
+  useEffect(()=>{
+    getCustomerCountData
+  },[])
 
   useEffect(() => {
     const map = L.map('map').setView([7.8731, 80.7718], 7); // Sri Lanka coordinates and zoom level
