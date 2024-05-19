@@ -11,4 +11,15 @@ return response;
 
 };
 
-export{UserLogin}
+const UserRegister = async(data) => {
+    const response = await postData("/user/save-customer",  data, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+return response;
+
+};
+
+export{UserLogin,UserRegister}

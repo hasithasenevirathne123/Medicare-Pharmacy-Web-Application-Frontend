@@ -12,10 +12,11 @@ import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { showAlertMessage } from '../app/alertMessageController';
 import { setAccessToken, setRefreshToken, setuserDetails } from '../reducers/userslice';
-import { UserLogin } from '../services/userservice';
+import { UserLogin, UserRegister } from '../services/userservice';
 
 
 function Header() {
+  // State variables
   const [open, setOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
@@ -25,10 +26,56 @@ function Header() {
   const [loginSignup, setloginSignup] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState(''); // Add state variables for form fields
+  const [lastName, setLastName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [nic, setNic] = useState("");
+  const [gender, setGender] = useState("");
 
-  const [activeButton, setActiveButton] = useState('personal');
-  const [anchorEl, setAnchorEl] = useState(null);
 
+  const handleFirstNameChange = (event) => {
+    setFirstName(event.target.value);
+  };
+
+  const handleLastNameChange = (event) => {
+    setLastName(event.target.value);
+  };
+
+  const handleMobileNumberChange = (event) => {
+    setMobileNumber(event.target.value);
+  };
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handleStreetAddressChange = (event) => {
+    setStreetAddress(event.target.value);
+  };
+
+  const handleCityChange = (event) => {
+    setCity(event.target.value);
+  };
+
+  const handleNICChange = (event) => {
+    setNic(event.target.value);
+  };
+
+  const handleGenderChange = (event) => {
+    setGender(event.target.value);
+  };
+
+  const handlePasswordChange = (event) => {
+    setpass(event.target.value);
+  };
+
+  const handleConfirmPasswordChange = (event) => {
+    setConfirmPassword(event.target.value);
+  };
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -51,53 +98,52 @@ function Header() {
   });
 
 
-  const[username, setuser] = useState("");
-  const[password, setpass] = useState("");
+  const [username, setuser] = useState("");
+  const [password, setpass] = useState("");
 
 
-  const handleLogin = async() =>{
-    try 
-    {
+  const handleLogin = async () => {
+    try {
       const response = await UserLogin(username, password);
       console.log("response", response);
       let userDetails = {
-        lastName:response?.data?.last_name,
-        userId:"",
+        lastName: response?.data?.last_name,
+        userId: "",
 
       };
 
-      if(response.data.user.user_type_id){
-        if(response.data.user.user_type_id === 1){
+      if (response.data.user.user_type_id) {
+        if (response.data.user.user_type_id === 1) {
           userDetails.userId = response?.data?.admin?.id;
         }
-        else if(response.data.user.user_type_id === 2){
+        else if (response.data.user.user_type_id === 2) {
           userDetails.userId = response?.data?.customer?.id;
         }
       }
-      
-      
-      if(response?.responseCode === 1000){
+
+
+      if (response?.responseCode === 1000) {
         showAlertMessage({
-          message:"Login successful",
-          type:"success"
+          message: "Login successful",
+          type: "success"
         });
-        dispatch(setAccessToken({key:response?.data?.token}));
-        dispatch(setRefreshToken({key:response?.data?.refresh}));
+        dispatch(setAccessToken({ key: response?.data?.token }));
+        dispatch(setRefreshToken({ key: response?.data?.refresh }));
         dispatch(setuserDetails(userDetails));
         console.log("User Details", userDetails);
-        localStorage.setItem("jwtoken",response?.data?.token);
-        
-        if(response.data.user.user_type_id === 2){
-            navigate("user/dashboard");
+        localStorage.setItem("jwtoken", response?.data?.token);
+
+        if (response.data.user.user_type_id === 2) {
+          navigate("user/dashboard");
         }
-        else if(response.data.user.user_type_id === 1){
-           navigate("admin/dashboard");
+        else if (response.data.user.user_type_id === 1) {
+          navigate("admin/dashboard");
         }
-       
+
       }
-      
+
     } catch (error) {
-      console.log("error",error);
+      console.log("error", error);
     }
   }
 
@@ -176,12 +222,68 @@ function Header() {
   //   navigate( "/user/dashboard" )
   // }
 
+  const handleSignUp = async () => {
+    try {
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      // Prepare the data object to be sent as JSON
+      const userData = {
+        email : email,
+        password : password,
+        firstName : firstName,
+        lastName : lastName,
+        userTypeId : 2,
+        mobileNumber : mobileNumber,
+        streetAddress : streetAddress,
+        city : city,
+        nic : nic,
+        gender : gender,
+      };
+
+      // Call UserRegister function with form data as JSON
+      const response = await UserRegister(userData);
+      console.log('SignUp Response:', response);
+
+      // Handle the response from the API based on your requirements
+      if (response && response.data) {
+        // Handle successful registration response
+        showAlertMessage({
+          message: response.data.message || "Registration successful",
+          type: "success"
+        });
+
+        // Close the SignUp modal after successful registration
+        setSignupOpen(false);
+
+        // Uncomment and modify as needed to navigate after signup
+        // navigate('/user/dashboard');
+      } else {
+        // Handle invalid or unexpected response from the API
+        showAlertMessage({
+          message: "Invalid response from server",
+          type: "error"
+        });
+      }
+    } catch (error) {
+      console.error('Error during SignUp:', error);
+      // Handle error, show error message, etc.
+      showAlertMessage({
+        message: "An error occurred during registration",
+        type: "error"
+      });
+    }
+  };
 
   const {
     register,
     handleSubmit,
-    formState:{errors},
+    formState: { errors },
   } = useForm();
+
 
   return (
     <Box
@@ -322,156 +424,156 @@ function Header() {
                   {/* //login */}
                   <form onSubmit={handleSubmit(handleLogin)} data-aos="fade-left">
 
-                  <Grid
-                    item
-                    display={"flex"}
-                    justifyContent={"center"}
-                    flexDirection={"column"}
-                  >
                     <Grid
                       item
                       display={"flex"}
                       justifyContent={"center"}
-                      alignItems={"center"}
-                      mt={2}
-                    >
-                      <img src={Logo} width={"50%"} alt="" />
-                    </Grid>
-
-                    <Grid
-                      item
-                      xs={12}
-                      sm={12}
-                      md={12}
-                      lg={12}
-                      xl={12}
                       flexDirection={"column"}
-                      display={"flex"}
-                      justifyContent={"center"}
-                      alignItems={"start"}
-                      mt={2}
                     >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontSize: {
-                            xs: "13px",
-                            sm: "13px",
-                            md: "13px",
-                            lg: "13px",
-                            xl: "15px",
-                          },
-                        }}
-                        fontWeight={600}
+                      <Grid
+                        item
+                        display={"flex"}
+                        justifyContent={"center"}
+                        alignItems={"center"}
+                        mt={2}
                       >
-                        Enter Email <span style={{ color: "#0070C0" }}>*</span>
-                      </Typography>
-                      <TextField
-                      onChange={(e)=>setuser(e.target.value)}
-                      value={username}
-                  
-                        //id="outlined-basic"
-                       // value={username}
-                        // label="Tp Number"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            // height: '35px', // Set the desired height
-                          },
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#757575",
-                          },
-                        }}
-                      />
-                    </Grid>
+                        <img src={Logo} width={"50%"} alt="" />
+                      </Grid>
 
-                    <Grid
-                      item
-                      xs={12}
-                      sm={12}
-                      md={12}
-                      lg={12}
-                      xl={12}
-                      flexDirection={"column"}
-                      display={"flex"}
-                      justifyContent={"center"}
-                      alignItems={"start"}
-                      mt={1}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontSize: {
-                            xs: "13px",
-                            sm: "13px",
-                            md: "13px",
-                            lg: "13px",
-                            xl: "15px",
-                          },
-                        }}
-                        fontWeight={600}
+                      <Grid
+                        item
+                        xs={12}
+                        sm={12}
+                        md={12}
+                        lg={12}
+                        xl={12}
+                        flexDirection={"column"}
+                        display={"flex"}
+                        justifyContent={"center"}
+                        alignItems={"start"}
+                        mt={2}
                       >
-                        Enter Password{" "}
-                        <span style={{ color: "#0070C0" }}>*</span>
-                      </Typography>
-                      <TextField
-                        id="outlined-basic"
-                        // label="Tp Number"
-                        value={password}
-                        onChange={(e)=>setpass(e.target.value)}
-                        type="password"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            // height: '35px', // Set the desired height
-                          },
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#757575",
-                          },
-                        }}
-                      />
-                    </Grid>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontSize: {
+                              xs: "13px",
+                              sm: "13px",
+                              md: "13px",
+                              lg: "13px",
+                              xl: "15px",
+                            },
+                          }}
+                          fontWeight={600}
+                        >
+                          Enter Email <span style={{ color: "#0070C0" }}>*</span>
+                        </Typography>
+                        <TextField
+                          onChange={(e) => setuser(e.target.value)}
+                          value={username}
 
-                    <Grid
-                      container
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <Grid item>
-                        <FormControlLabel
-                          control={<Checkbox defaultChecked />}
-                          label="Remember Me"
+                          //id="outlined-basic"
+                          // value={username}
+                          // label="Tp Number"
+                          variant="outlined"
+                          fullWidth
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              // height: '35px', // Set the desired height
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#757575",
+                            },
+                          }}
                         />
                       </Grid>
-                      <Grid item>
-                        <Typography variant="body2" color="primary">
-                          Forgot Password?
+
+                      <Grid
+                        item
+                        xs={12}
+                        sm={12}
+                        md={12}
+                        lg={12}
+                        xl={12}
+                        flexDirection={"column"}
+                        display={"flex"}
+                        justifyContent={"center"}
+                        alignItems={"start"}
+                        mt={1}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontSize: {
+                              xs: "13px",
+                              sm: "13px",
+                              md: "13px",
+                              lg: "13px",
+                              xl: "15px",
+                            },
+                          }}
+                          fontWeight={600}
+                        >
+                          Enter Password{" "}
+                          <span style={{ color: "#0070C0" }}>*</span>
                         </Typography>
+                        <TextField
+                          id="outlined-basic"
+                          // label="Tp Number"
+                          value={password}
+                          onChange={(e) => setpass(e.target.value)}
+                          type="password"
+                          variant="outlined"
+                          fullWidth
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              // height: '35px', // Set the desired height
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#757575",
+                            },
+                          }}
+                        />
                       </Grid>
+
+                      <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Grid item>
+                          <FormControlLabel
+                            control={<Checkbox defaultChecked />}
+                            label="Remember Me"
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Typography variant="body2" color="primary">
+                            Forgot Password?
+                          </Typography>
+                        </Grid>
+                      </Grid>
+
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={handleLogin}
+                        sx={{
+                          mt: 5,
+                          "&:hover": { backgroundColor: "primary.main" },
+                          fontSize: {
+                            xs: "17px",
+                            sm: "17px",
+                            md: "17px",
+                            lg: "14px",
+                            xl: "23px",
+                          },
+                        }}
+                      >
+                        Login
+                      </Button>
+
                     </Grid>
-
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={handleLogin}
-                      sx={{
-                        mt: 5,
-                        "&:hover": { backgroundColor: "primary.main" },
-                        fontSize: {
-                          xs: "17px",
-                          sm: "17px",
-                          md: "17px",
-                          lg: "14px",
-                          xl: "23px",
-                        },
-                      }}
-                    >
-                      Login
-                    </Button>
-
-                  </Grid>
                   </form>
                   {/* //login */}
                 </Box>
@@ -480,6 +582,8 @@ function Header() {
           </Box>
         </Fade>
       </Modal>
+
+
 
       {/*  register  Modal */}
       <Modal
@@ -549,392 +653,496 @@ function Header() {
             </Grid>
 
             {/* Personal account Modal content */}
-            <Grid container spacing={1} rowGap={1} mt={1}>
-              {/*  First Name  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"start"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+            <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }}>
+              <Grid container spacing={1} rowGap={1} mt={1}>
+                {/*  First Name  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"start"}
                 >
-                  First Name <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575', // Set the border color
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    First Name <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575', // Set the border color
+                      },
+                    }}
+                    value={firstName}
+                    onChange={handleFirstNameChange}
 
-              {/*  Last Name  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"start"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                  />
+                </Grid>
+
+                {/*  Last Name  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"start"}
                 >
-                  Last Name <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Last Name <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={lastName}
+                    onChange={handleLastNameChange}
+                  />
+                </Grid>
 
-              {/* Mobile Number field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"start"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/* Mobile Number field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"start"}
                 >
-                  Mobile Number <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Mobile Number <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={mobileNumber}
+                    onChange={handleMobileNumberChange}
+                  />
+                </Grid>
 
-              {/* Email  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"start"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/* Email  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"start"}
                 >
-                  Email <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Email <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={email}
+                    onChange={handleEmailChange}
+                  />
+                </Grid>
 
-              {/*  Street Address  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/*  Street Address  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
                 >
-                  Street Address <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      width: "auto", // Set the desired width
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Street Address <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={streetAddress}
+                    onChange={handleStreetAddressChange}
+                  />
+                </Grid>
 
-              {/*  City  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/*  City  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
                 >
-                  City <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      width: "auto", // Set the desired width
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    City <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={city}
+                    onChange={handleCityChange}
+                  />
+                </Grid>
 
-              {/*  NIC Number  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/*  NIC Number  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
                 >
-                  NIC Number <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      width: "auto", // Set the desired width
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      // borderColor: '#757575',
-                    },
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    NIC Number <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        // borderColor: '#757575',
+                      },
+                    }}
+                    value={nic}
+                    onChange={handleNICChange}
+                  />
+                </Grid>
 
-              {/*  Gender  field */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={6}
-                lg={6}
-                xl={6}
-                flexDirection={"column"}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontSize: {
-                      xs: "13px",
-                      sm: "13px",
-                      md: "13px",
-                      lg: "13px",
-                      xl: "15px",
-                    },
-                  }}
-                  fontWeight={600}
+                {/*  Gender  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
                 >
-                  Gender <span style={{ color: "#0070C0" }}>*</span>
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  // label="Tp Number"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      width: "auto", // Set the desired width
-                      height: "35px", // Set the desired height
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {},
-                  }}
-                />
-              </Grid>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Gender <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {},
+                    }}
+                    value={gender}
+                    onChange={handleGenderChange}
+                  />
+                </Grid>
 
-              {/* Terms & Conditions Checkbox */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={12}
-                lg={12}
-                xl={12}
-                flexDirection={"column"}
-              >
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="I have read and agree to Terms & Conditions"
-                />
-              </Grid>
-
-              {/* Submit btn */}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={12}
-                lg={12}
-                xl={12}
-                flexDirection={"column"}
-                display={"flex"}
-                justifyContent={"end"}
-                alignItems={"end"}
-              >
-                <Button
-                  variant="contained"
-                  disableElevation
-                  onClick={handleClosePersonalAccToggle}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "#1976d2", // Primary color
-                    },
-                  }}
+                {/*  Password  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
                 >
-                  Signup
-                </Button>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Password <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {},
+                    }}
+                    value={password}
+                    onChange={handlePasswordChange}
+                  />
+                </Grid>
+
+                {/*  Confirm Password  field */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={6}
+                  lg={6}
+                  xl={6}
+                  flexDirection={"column"}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: {
+                        xs: "13px",
+                        sm: "13px",
+                        md: "13px",
+                        lg: "13px",
+                        xl: "15px",
+                      },
+                    }}
+                    fontWeight={600}
+                  >
+                    Confirm Password <span style={{ color: "#0070C0" }}>*</span>
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    // label="Tp Number"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        width: "auto", // Set the desired width
+                        height: "35px", // Set the desired height
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {},
+                    }}
+                    value={confirmPassword}
+                    onChange={handleConfirmPasswordChange}
+                  />
+                </Grid>
+
+                {/* Terms & Conditions Checkbox */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={12}
+                  lg={12}
+                  xl={12}
+                  flexDirection={"column"}
+                >
+                  <FormControlLabel
+                    control={<Checkbox />}
+                    label="I have read and agree to Terms & Conditions"
+                  />
+                </Grid>
+
+                {/* Submit btn */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={12}
+                  lg={12}
+                  xl={12}
+                  flexDirection={"column"}
+                  display={"flex"}
+                  justifyContent={"end"}
+                  alignItems={"end"}
+                >
+                  <Button
+                    type='submit'
+                    variant="contained"
+                    disableElevation
+                    onClick={handleClosePersonalAccToggle}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "#1976d2", // Primary color
+                      },
+                    }}
+                  >
+                    Signup
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
+            </form>
           </Box>
         </Fade>
       </Modal>
