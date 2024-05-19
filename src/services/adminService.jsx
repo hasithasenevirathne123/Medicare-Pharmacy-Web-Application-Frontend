@@ -18,9 +18,6 @@ const getCustomers = async() => {
     return response;
 }
 
-<<<<<<< HEAD
-export {getDashboardData,getOrders,getCustomers}
-=======
 const addProduct = async(data) => {
 
     const response = await postData(`/admin/add-new-product`, data, {
@@ -32,4 +29,3 @@ const addProduct = async(data) => {
 }
 
 export {getDashboardData,getOrders,getCustomers,addProduct}
->>>>>>> 42386983cd0f7c41206b073979680b862a69b38f
